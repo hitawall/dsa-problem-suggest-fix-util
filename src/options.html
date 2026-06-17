@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NeetCode Debug Overlay — Settings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #141414;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      max-width: 600px;
+      margin: 0 auto 28px;
+    }
+    .page-header h1 {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #f0f0f0;
+    }
+    .page-header p {
+      margin: 0;
+      font-size: 13px;
+      color: #888;
+    }
+
+    .cards {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .provider-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f0f0f0;
+    }
+
+    .provider-meta {
+      font-size: 11px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .provider-meta a {
+      color: #38bdf8;
+      text-decoration: none;
+    }
+    .provider-meta a:hover { text-decoration: underline; }
+
+    .key-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .key-badge.saved {
+      background: #0d2818;
+      color: #4ade80;
+      border: 1px solid #166534;
+    }
+    .key-badge.missing {
+      background: #2a1a1a;
+      color: #888;
+      border: 1px solid #3a2a2a;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 8px 10px;
+      background: #2a2a2a;
+      border: 1px solid #3a3a3a;
+      color: #e0e0e0;
+      border-radius: 4px;
+      font-size: 13px;
+      outline: none;
+    }
+    .input-row input:focus { border-color: #0ea5e9; }
+
+    .input-row button {
+      padding: 8px 16px;
+      background: #0ea5e9;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .input-row button:hover { background: #0284c7; }
+
+    .clear-btn {
+      background: none !important;
+      color: #666 !important;
+      border: 1px solid #3a3a3a !important;
+      padding: 8px 10px !important;
+    }
+    .clear-btn:hover { color: #f87171 !important; border-color: #f87171 !important; }
+
+    .save-status {
+      font-size: 12px;
+      margin-top: 6px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>NeetCode Debug Overlay — Settings</h1>
+    <p>Add API keys for each provider. Switch the active provider from the extension popup.</p>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <script src="options.js"></script>
+</body>
+</html>

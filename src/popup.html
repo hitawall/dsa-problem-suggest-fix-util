@@ -6,16 +6,17 @@
   <style>
     body {
       font-family: system-ui, sans-serif;
-      width: 300px;
-      padding: 16px;
+      width: 240px;
+      padding: 14px 16px;
       background: #1e1e1e;
       color: #e0e0e0;
       margin: 0;
     }
     h2 {
-      margin: 0 0 14px;
-      font-size: 14px;
+      margin: 0 0 12px;
+      font-size: 13px;
       font-weight: 600;
+      color: #f0f0f0;
     }
     label {
       display: block;
@@ -25,7 +26,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    select, input {
+    select {
       width: 100%;
       box-sizing: border-box;
       padding: 8px 10px;
@@ -34,34 +35,34 @@
       color: #e0e0e0;
       border-radius: 4px;
       font-size: 13px;
-      margin-bottom: 10px;
+      cursor: pointer;
       outline: none;
+      margin-bottom: 10px;
     }
-    select { cursor: pointer; }
-    select:focus, input:focus { border-color: #0ea5e9; }
-    button {
+    select:focus { border-color: #0ea5e9; }
+    #keyStatus {
+      font-size: 12px;
+      min-height: 14px;
+      margin-bottom: 12px;
+    }
+    #manageBtn {
       width: 100%;
       padding: 8px;
-      background: #0ea5e9;
-      color: #fff;
-      border: none;
+      background: #2a2a2a;
+      color: #aaa;
+      border: 1px solid #444;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    button:hover { background: #0284c7; }
-    #status {
-      margin-top: 8px;
       font-size: 12px;
-      min-height: 16px;
+      text-align: center;
     }
+    #manageBtn:hover { background: #333; color: #e0e0e0; border-color: #555; }
   </style>
 </head>
 <body>
   <h2>NeetCode Debug Overlay</h2>
 
-  <label for="provider">Provider</label>
+  <label for="provider">Active Provider</label>
   <select id="provider">
     <option value="gemini">Gemini (Google AI Studio)</option>
     <option value="groq">Groq</option>
@@ -69,11 +70,10 @@
     <option value="openai">OpenAI</option>
   </select>
 
-  <label for="apiKey">API Key</label>
-  <input id="apiKey" type="password" placeholder="AIza...">
+  <div id="keyStatus"></div>
 
-  <button id="saveBtn">Save Key</button>
-  <div id="status"></div>
+  <button id="manageBtn">⚙ Manage API Keys</button>
+
   <script src="popup.js"></script>
 </body>
 </html>

@@ -18,6 +18,7 @@
     "default_popup": "src/popup.html",
     "default_title": "NeetCode Debug Overlay"
   },
+  "options_page": "src/options.html",
   "content_scripts": [
     {
       "matches": ["*://neetcode.io/problems/*"],

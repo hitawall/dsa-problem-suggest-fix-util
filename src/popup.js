@@ -1,65 +1,36 @@
-const KEY_PLACEHOLDERS = {
-  gemini:    'AIza...',
-  groq:      'gsk_...',
-  anthropic: 'sk-ant-...',
-  openai:    'sk-...',
-};
-
 document.addEventListener('DOMContentLoaded', () => {
   const providerSelect = document.getElementById('provider');
-  const keyInput       = document.getElementById('apiKey');
-  const saveBtn        = document.getElementById('saveBtn');
-  const statusEl       = document.getElementById('status');
+  const keyStatus      = document.getElementById('keyStatus');
+  const manageBtn      = document.getElementById('manageBtn');
 
-  function setStatus(text, color = '#4ade80') {
-    statusEl.textContent   = text;
-    statusEl.style.color   = color;
-  }
-
-  function updateForProvider(provider, keys) {
-    keyInput.value       = '';
-    keyInput.placeholder = KEY_PLACEHOLDERS[provider] || '...';
+  function showKeyStatus(provider, keys) {
     if (keys?.[provider]) {
-      setStatus('✓ Key saved for this provider. Paste to replace.', '#4ade80');
+      keyStatus.textContent   = '✓ API key set';
+      keyStatus.style.color   = '#4ade80';
     } else {
-      setStatus('No key set for this provider.', '#888');
+      keyStatus.textContent   = '✖ No key — add one via Manage API Keys';
+      keyStatus.style.color   = '#f87171';
     }
   }
 
-  // Load saved provider + all keys on open
+  // Load saved state
   chrome.storage.sync.get(['provider', 'keys'], ({ provider, keys }) => {
-    const saved = provider || 'gemini';
-    providerSelect.value = saved;
-    updateForProvider(saved, keys);
+    const active = provider || 'gemini';
+    providerSelect.value = active;
+    showKeyStatus(active, keys);
   });
 
-  // Switch provider — update placeholder and key status without saving yet
+  // Save provider immediately on change — this was the persistence bug
   providerSelect.addEventListener('change', () => {
-    chrome.storage.sync.get('keys', ({ keys }) => {
-      updateForProvider(providerSelect.value, keys);
-    });
-  });
-
-  saveBtn.addEventListener('click', () => {
-    const val      = keyInput.value.trim();
-    const provider = providerSelect.value;
-
-    if (!val) {
-      setStatus('Please enter a key.', '#f87171');
-      return;
-    }
-
-    chrome.storage.sync.get('keys', ({ keys }) => {
-      const updatedKeys = { ...(keys || {}), [provider]: val };
-      chrome.storage.sync.set({ provider, keys: updatedKeys }, () => {
-        keyInput.value       = '';
-        keyInput.placeholder = KEY_PLACEHOLDERS[provider] || '...';
-        setStatus('✓ Saved.', '#4ade80');
+    const selected = providerSelect.value;
+    chrome.storage.sync.set({ provider: selected }, () => {
+      chrome.storage.sync.get('keys', ({ keys }) => {
+        showKeyStatus(selected, keys);
       });
     });
   });
 
-  keyInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') saveBtn.click();
+  manageBtn.addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
   });
 });

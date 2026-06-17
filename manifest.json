@@ -18,7 +18,7 @@
   "content_scripts": [
     {
       "matches": ["*://neetcode.io/problems/*"],
-      "js": ["src/lib/marked.min.js", "src/content.js"],
+      "js": ["src/lib/marked.min.js", "src/lib/diff.min.js", "src/content.js"],
       "css": ["src/overlay.css"],
       "run_at": "document_idle"
     }

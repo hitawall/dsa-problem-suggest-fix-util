@@ -240,15 +240,131 @@
         renderError(body, spinner, response.error);
         return;
       }
-      renderResult(body, spinner, response.result);
+      renderResult(body, spinner, response.result, ctx.code);
     });
   }
 
-  function renderResult(body, spinner, text) {
+  function renderResult(body, spinner, text, originalCode) {
     spinner.remove();
-    const content = document.createElement('div');
-    content.innerHTML = marked.parse(text);
-    body.appendChild(content);
+    const correctedCode = extractCorrectedCode(text);
+    if (originalCode && correctedCode) {
+      renderTabbed(body, text, originalCode, correctedCode);
+    } else {
+      const content = document.createElement('div');
+      content.innerHTML = marked.parse(text);
+      body.appendChild(content);
+    }
+  }
+
+  // ── Extract corrected code from LLM response ─────────────────
+  // The prompt instructs the model to end with a single fenced code
+  // block — we grab the last one in the response.
+  function extractCorrectedCode(text) {
+    const fenceRegex = /```(?:\w+)?\n([\s\S]*?)```/g;
+    let last = null;
+    let m;
+    while ((m = fenceRegex.exec(text)) !== null) last = m[1];
+    return last;
+  }
+
+  // ── Tabbed explanation + diff view ───────────────────────────
+  function renderTabbed(body, responseText, originalCode, correctedCode) {
+    const tabBar = document.createElement('div');
+    tabBar.className = 'ncd-tab-bar';
+
+    const explainBtn = document.createElement('button');
+    explainBtn.className = 'ncd-tab ncd-tab-active';
+    explainBtn.textContent = 'Explanation';
+
+    const diffBtn = document.createElement('button');
+    diffBtn.className = 'ncd-tab';
+    diffBtn.textContent = 'Diff';
+
+    tabBar.appendChild(explainBtn);
+    tabBar.appendChild(diffBtn);
+
+    const explainPanel = document.createElement('div');
+    explainPanel.className = 'ncd-panel';
+    explainPanel.innerHTML = marked.parse(responseText);
+
+    const diffPanel = document.createElement('div');
+    diffPanel.className = 'ncd-panel ncd-panel-hidden';
+    diffPanel.appendChild(buildDiffView(originalCode, correctedCode));
+
+    explainBtn.addEventListener('click', () => {
+      explainBtn.classList.add('ncd-tab-active');
+      diffBtn.classList.remove('ncd-tab-active');
+      explainPanel.classList.remove('ncd-panel-hidden');
+      diffPanel.classList.add('ncd-panel-hidden');
+    });
+    diffBtn.addEventListener('click', () => {
+      diffBtn.classList.add('ncd-tab-active');
+      explainBtn.classList.remove('ncd-tab-active');
+      diffPanel.classList.remove('ncd-panel-hidden');
+      explainPanel.classList.add('ncd-panel-hidden');
+    });
+
+    body.appendChild(tabBar);
+    body.appendChild(explainPanel);
+    body.appendChild(diffPanel);
+  }
+
+  // ── Diff renderer ────────────────────────────────────────────
+  function buildDiffView(originalCode, correctedCode) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ncd-diff-wrapper';
+
+    const changes = Diff.diffLines(originalCode, correctedCode);
+    const table = document.createElement('table');
+    table.className = 'ncd-diff-table';
+
+    let oldLine = 1;
+    let newLine = 1;
+
+    changes.forEach(part => {
+      const lines = part.value.split('\n');
+      if (lines.at(-1) === '') lines.pop();
+
+      lines.forEach(lineText => {
+        const tr = document.createElement('tr');
+
+        const tdOld  = document.createElement('td');
+        tdOld.className = 'ncd-ln';
+        const tdNew  = document.createElement('td');
+        tdNew.className = 'ncd-ln';
+        const tdSign = document.createElement('td');
+        tdSign.className = 'ncd-sign';
+        const tdCode = document.createElement('td');
+        tdCode.className = 'ncd-code';
+        tdCode.textContent = lineText;
+
+        if (part.added) {
+          tr.className = 'ncd-added';
+          tdOld.textContent = '';
+          tdNew.textContent = newLine++;
+          tdSign.textContent = '+';
+        } else if (part.removed) {
+          tr.className = 'ncd-removed';
+          tdOld.textContent = oldLine++;
+          tdNew.textContent = '';
+          tdSign.textContent = '-';
+        } else {
+          tr.className = 'ncd-context';
+          tdOld.textContent = oldLine++;
+          tdNew.textContent = newLine++;
+          tdSign.textContent = ' ';
+        }
+
+        tr.appendChild(tdOld);
+        tr.appendChild(tdNew);
+        tr.appendChild(tdSign);
+        tr.appendChild(tdCode);
+        table.appendChild(tr);
+      });
+    });
+
+    wrapper.appendChild(table);
+    return wrapper;
   }
 
   function renderError(body, spinner, message) {

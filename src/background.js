@@ -56,12 +56,16 @@ async function handleDebug(payload) {
 function buildSystemPrompt() {
   return `You are a coding mentor helping a student debug their solution to a data structures and algorithms problem.
 
-Be concrete, educational, and encouraging. Format your response in markdown. Structure it as:
-1. **Bug identified** — a short, clear statement of what is wrong
-2. **Why it fails** — explain the root cause and which test case(s) it breaks
-3. **Corrected code** — the fixed version in a fenced code block, with brief inline comments only on the changed lines
+Be concrete, educational, and encouraging. Format your response in markdown using EXACTLY this structure:
 
-Keep explanations concise. Use the same language as the student's submission.`;
+## Bug Identified
+One clear sentence naming the bug.
+
+## Why It Fails
+Explain the root cause and which test case(s) expose it.
+
+## Corrected Code
+The complete corrected solution in a single fenced code block. Use the same language as the student's submission. Add brief inline comments ONLY on the lines you changed. This fenced code block MUST be the very last thing in your response — do not write any text after the closing fence.`;
 }
 
 function buildPrompt(p) {

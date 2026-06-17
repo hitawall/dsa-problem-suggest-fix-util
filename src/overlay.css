@@ -176,3 +176,86 @@
   color: #aaa;
 }
 .ncd-modal-body strong { color: #f0f0f0; }
+
+/* ── Tabs ───────────────────────────────────────────────────── */
+.ncd-tab-bar {
+  display: flex;
+  border-bottom: 1px solid #333;
+  margin-bottom: 16px;
+  flex-shrink: 0;
+}
+.ncd-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  margin-bottom: -1px;
+  transition: color 0.12s, border-color 0.12s;
+}
+.ncd-tab:hover { color: #e0e0e0; }
+.ncd-tab.ncd-tab-active {
+  color: #f0f0f0;
+  border-bottom-color: #0ea5e9;
+}
+.ncd-panel-hidden { display: none !important; }
+
+/* ── Diff view ──────────────────────────────────────────────── */
+.ncd-diff-wrapper {
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  overflow: hidden;
+  font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.ncd-diff-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: max-content;
+}
+.ncd-ln {
+  color: #555;
+  text-align: right;
+  padding: 1px 10px;
+  min-width: 38px;
+  user-select: none;
+  white-space: nowrap;
+  border-right: 1px solid #2a2a2a;
+  vertical-align: top;
+}
+.ncd-sign {
+  padding: 1px 8px;
+  user-select: none;
+  white-space: pre;
+  border-right: 1px solid #2a2a2a;
+  vertical-align: top;
+}
+.ncd-code {
+  padding: 1px 12px;
+  white-space: pre;
+  width: 100%;
+  vertical-align: top;
+}
+
+/* Added lines */
+.ncd-added { background: #0d2818; }
+.ncd-added .ncd-ln  { background: #0f3020; color: #3fb950; border-color: #1a4028; }
+.ncd-added .ncd-sign { background: #0f3020; color: #3fb950; border-color: #1a4028; }
+.ncd-added .ncd-code { color: #b0f0c0; }
+
+/* Removed lines */
+.ncd-removed { background: #2d0f0f; }
+.ncd-removed .ncd-ln  { background: #3d1010; color: #f85149; border-color: #5a1818; }
+.ncd-removed .ncd-sign { background: #3d1010; color: #f85149; border-color: #5a1818; }
+.ncd-removed .ncd-code { color: #ffb0b0; }
+
+/* Context lines */
+.ncd-context { background: #161616; }
+.ncd-context .ncd-ln  { color: #4a4a4a; }
+.ncd-context .ncd-sign { color: #3a3a3a; }
+.ncd-context .ncd-code { color: #888; }

@@ -52,14 +52,19 @@ jobs:
           fi
           echo "No CDN references in src/ — OK"
 
-      - name: Check marked.min.js is vendored
+      - name: Check vendored libs are present
         run: |
           test -f src/lib/marked.min.js || {
             echo "src/lib/marked.min.js missing. Run:"
             echo "  curl -fsSL https://cdn.jsdelivr.net/npm/marked@12/marked.min.js -o src/lib/marked.min.js"
             exit 1
           }
-          echo "src/lib/marked.min.js present — OK"
+          test -f src/lib/diff.min.js || {
+            echo "src/lib/diff.min.js missing. Run:"
+            echo "  curl -fsSL https://cdn.jsdelivr.net/npm/diff@7/dist/diff.min.js -o src/lib/diff.min.js"
+            exit 1
+          }
+          echo "Vendored libs present — OK"
 
       - name: Check API key is not hardcoded
         run: |

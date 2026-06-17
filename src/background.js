@@ -134,6 +134,9 @@ async function httpError(response, label) {
   if (response.status === 429) {
     return { error: `Rate limited by ${label} (429). Wait a moment and try again.` };
   }
+  if (response.status === 503 || response.status === 529) {
+    return { error: `${label} is overloaded right now (${response.status}). Wait 30 seconds and try again, or switch to a different provider via the extension icon.` };
+  }
   const body = await response.text().catch(() => '');
   return { error: `${label} API error ${response.status}: ${body.slice(0, 200)}` };
 }

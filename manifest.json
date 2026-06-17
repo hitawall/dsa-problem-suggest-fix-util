@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "NeetCode Debug Overlay",
+  "version": "1.0.0",
+  "description": "AI-powered debug button for NeetCode problem pages.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "*://neetcode.io/*",
+    "https://api.groq.com/*",
+    "https://api.anthropic.com/*",
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.cerebras.ai/*",
+    "https://openrouter.ai/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_popup": "src/popup.html",
+    "default_title": "NeetCode Debug Overlay"
+  },
+  "options_page": "src/options.html",
+  "content_scripts": [
+    {
+      "matches": ["*://neetcode.io/problems/*"],
+      "js": ["src/lib/marked.min.js", "src/lib/diff.min.js", "src/content.js"],
+      "css": ["src/overlay.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

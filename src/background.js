@@ -10,23 +10,24 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 async function handleDebug(payload) {
   const { apiKey } = await chrome.storage.sync.get('apiKey');
   if (!apiKey) {
-    return { error: 'No API key set. Click the extension icon to add your Anthropic API key.' };
+    return { error: 'No API key set. Click the extension icon to add your Groq API key.' };
   }
 
   let response;
   try {
-    response = await fetch('https://api.anthropic.com/v1/messages', {
+    response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 2048,
-        system: buildSystemPrompt(),
-        messages: [{ role: 'user', content: buildPrompt(payload) }]
+        messages: [
+          { role: 'system', content: buildSystemPrompt() },
+          { role: 'user', content: buildPrompt(payload) }
+        ]
       })
     });
   } catch (networkErr) {
@@ -38,16 +39,16 @@ async function handleDebug(payload) {
       return { error: 'Invalid API key (401). Update it via the extension icon.' };
     }
     if (response.status === 429) {
-      return { error: 'Rate limited by Claude API (429). Wait a moment and try again.' };
+      return { error: 'Rate limited by Groq API (429). Wait a moment and try again.' };
     }
     const body = await response.text().catch(() => '');
-    return { error: `Claude API error ${response.status}: ${body.slice(0, 200)}` };
+    return { error: `Groq API error ${response.status}: ${body.slice(0, 200)}` };
   }
 
   const data = await response.json();
-  const text = data?.content?.[0]?.text;
+  const text = data?.choices?.[0]?.message?.content;
   if (!text) {
-    return { error: 'Unexpected response from Claude API — no text content.' };
+    return { error: 'Unexpected response from Groq API — no text content.' };
   }
   return { result: text };
 }

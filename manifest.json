@@ -6,7 +6,7 @@
   "permissions": ["storage"],
   "host_permissions": [
     "*://neetcode.io/*",
-    "https://api.anthropic.com/*"
+    "https://api.groq.com/*"
   ],
   "background": {
     "service_worker": "src/background.js"

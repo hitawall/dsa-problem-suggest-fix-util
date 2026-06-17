@@ -8,8 +8,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 });
 
 async function handleDebug(payload) {
-  const { provider = 'gemini', keys = {} } = await chrome.storage.sync.get(['provider', 'keys']);
-  const apiKey = keys[provider];
+  const stored = await chrome.storage.sync.get(['provider', 'keys', 'openrouterModel']);
+  const provider = stored.provider || 'gemini';
+  const keys     = stored.keys || {};
+  const apiKey   = keys[provider];
 
   if (!apiKey) {
     return { error: `No API key set for ${providerLabel(provider)}. Click the extension icon to add one.` };
@@ -19,11 +21,14 @@ async function handleDebug(payload) {
   const user   = buildPrompt(payload);
 
   switch (provider) {
-    case 'gemini':    return callGemini(apiKey, system, user);
-    case 'groq':      return callOpenAICompat('groq', apiKey, system, user);
-    case 'openai':    return callOpenAICompat('openai', apiKey, system, user);
-    case 'anthropic': return callAnthropic(apiKey, system, user);
-    default:          return { error: `Unknown provider: ${provider}` };
+    case 'gemini':     return callGemini(apiKey, system, user);
+    case 'groq':       return callOpenAICompat('groq',      apiKey, system, user);
+    case 'openai':     return callOpenAICompat('openai',    apiKey, system, user);
+    case 'cerebras':   return callOpenAICompat('cerebras',  apiKey, system, user);
+    case 'openrouter': return callOpenAICompat('openrouter', apiKey, system, user,
+                         stored.openrouterModel || 'deepseek/deepseek-r1:free');
+    case 'anthropic':  return callAnthropic(apiKey, system, user);
+    default:           return { error: `Unknown provider: ${provider}` };
   }
 }
 
@@ -60,21 +65,31 @@ async function callGemini(apiKey, system, user) {
 
 // ── Provider: Groq + OpenAI (OpenAI-compatible format) ───────
 const OPENAI_COMPAT = {
-  groq:   { url: 'https://api.groq.com/openai/v1/chat/completions',  model: 'llama-3.3-70b-versatile' },
-  openai: { url: 'https://api.openai.com/v1/chat/completions',        model: 'gpt-4o' },
+  groq:       { url: 'https://api.groq.com/openai/v1/chat/completions',       model: 'llama-3.3-70b-versatile' },
+  openai:     { url: 'https://api.openai.com/v1/chat/completions',             model: 'gpt-4o' },
+  cerebras:   { url: 'https://api.cerebras.ai/v1/chat/completions',            model: 'llama-3.3-70b' },
+  openrouter: { url: 'https://openrouter.ai/api/v1/chat/completions',          model: 'deepseek/deepseek-r1:free' },
 };
 
-async function callOpenAICompat(provider, apiKey, system, user) {
-  const { url, model } = OPENAI_COMPAT[provider];
+// modelOverride is used by OpenRouter so the user can pick any :free model
+async function callOpenAICompat(provider, apiKey, system, user, modelOverride) {
+  const { url, model: defaultModel } = OPENAI_COMPAT[provider];
+  const model = modelOverride || defaultModel;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${apiKey}`,
+  };
+  // OpenRouter requires a Referer header to identify the calling app
+  if (provider === 'openrouter') {
+    headers['HTTP-Referer'] = 'https://github.com/hitawall/dsa-problem-suggest-fix-util';
+  }
 
   let response;
   try {
     response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
+      headers,
       body: JSON.stringify({
         model,
         max_tokens: 8192,
@@ -142,7 +157,10 @@ async function httpError(response, label) {
 }
 
 function providerLabel(provider) {
-  return { gemini: 'Gemini', groq: 'Groq', openai: 'OpenAI', anthropic: 'Anthropic' }[provider] ?? provider;
+  return {
+    gemini: 'Gemini', groq: 'Groq', openai: 'OpenAI',
+    anthropic: 'Anthropic', cerebras: 'Cerebras', openrouter: 'OpenRouter',
+  }[provider] ?? provider;
 }
 
 // ── Prompts ──────────────────────────────────────────────────

@@ -54,9 +54,18 @@ async function handleDebug(payload) {
 }
 
 function buildSystemPrompt() {
-  return `You are a coding mentor helping a student debug their solution to a data structures and algorithms problem.
+  return `You are a coding mentor helping a student with a data structures and algorithms problem.
 
-Be concrete, educational, and encouraging. Format your response in markdown using EXACTLY this structure:
+IMPORTANT: First decide honestly whether the code actually contains a bug for the given inputs. Do not assume there is always something wrong.
+
+─── If the code is CORRECT ───────────────────────────────────
+Respond with:
+
+## ✅ No Bug Found
+Briefly explain why the code is correct and should pass the test cases. Optionally mention minor style or efficiency notes, but do not invent problems.
+
+─── If the code has a BUG ────────────────────────────────────
+Respond with exactly this structure:
 
 ## Bug Identified
 One clear sentence naming the bug.
@@ -65,7 +74,7 @@ One clear sentence naming the bug.
 Explain the root cause and which test case(s) expose it.
 
 ## Corrected Code
-The complete corrected solution in a single fenced code block. Use the same language as the student's submission. Add brief inline comments ONLY on the lines you changed. This fenced code block MUST be the very last thing in your response — do not write any text after the closing fence.`;
+The complete corrected solution in a single fenced code block. Use the same language as the student's submission. Add brief inline comments ONLY on the changed lines. This fenced code block MUST be the very last thing in your response — do not write anything after the closing fence.`;
 }
 
 function buildPrompt(p) {

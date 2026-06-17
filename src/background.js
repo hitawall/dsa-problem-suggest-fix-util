@@ -40,7 +40,7 @@ async function callGemini(apiKey, system, user) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: system }] },
         contents: [{ role: 'user', parts: [{ text: user }] }],
-        generationConfig: { maxOutputTokens: 2048 }
+        generationConfig: { maxOutputTokens: 8192 }
       })
     });
   } catch (e) {
@@ -50,7 +50,10 @@ async function callGemini(apiKey, system, user) {
   if (!response.ok) return httpError(response, 'Gemini');
 
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  // Gemini 2.5 Flash is a thinking model — filter out thought parts
+  // (marked with thought: true) and join the visible response parts.
+  const parts = data?.candidates?.[0]?.content?.parts ?? [];
+  const text = parts.filter(p => !p.thought).map(p => p.text ?? '').join('');
   if (!text) return { error: 'Unexpected response from Gemini API.' };
   return { result: text };
 }
@@ -74,7 +77,7 @@ async function callOpenAICompat(provider, apiKey, system, user) {
       },
       body: JSON.stringify({
         model,
-        max_tokens: 2048,
+        max_tokens: 8192,
         messages: [
           { role: 'system', content: system },
           { role: 'user',   content: user }
@@ -106,7 +109,7 @@ async function callAnthropic(apiKey, system, user) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
+        max_tokens: 8192,
         system,
         messages: [{ role: 'user', content: user }]
       })

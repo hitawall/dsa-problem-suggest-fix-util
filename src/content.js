@@ -72,7 +72,7 @@
 
     const btn = document.createElement('button');
     btn.id          = 'ncd-debug-btn';
-    btn.textContent = '🐛 Debug with Claude';
+    btn.textContent = '🐛 Debug with AI';
     makeDraggable(btn);
     document.body.appendChild(btn);
     currentBtn = btn;
@@ -192,7 +192,7 @@
     header.className = 'ncd-modal-header';
 
     const title = document.createElement('h3');
-    title.textContent = '🐛 Debug with Claude';
+    title.textContent = '🐛 Debug with AI';
 
     const closeBtn = document.createElement('button');
     closeBtn.className   = 'ncd-close-btn';
@@ -215,7 +215,7 @@
 
     const spinner = document.createElement('div');
     spinner.className   = 'ncd-spinner';
-    spinner.textContent = 'Asking Claude…';
+    spinner.textContent = 'Analyzing your code…';
     body.appendChild(spinner);
 
     modal.appendChild(header);

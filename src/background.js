@@ -152,8 +152,43 @@ async function httpError(response, label) {
   if (response.status === 503 || response.status === 529) {
     return { error: `${label} is overloaded right now (${response.status}). Wait 30 seconds and try again, or switch to a different provider via the extension icon.` };
   }
+
   const body = await response.text().catch(() => '');
+
+  if (response.status === 400 && label === 'OpenRouter') {
+    const detail = extractOpenRouterErrorDetail(body);
+    if (detail && /degraded|provider returned error/i.test(detail)) {
+      return { error: `OpenRouter's upstream provider for this model is temporarily unavailable (${detail}). Wait a bit and retry, or pick a different free model via the extension icon.` };
+    }
+    if (detail) {
+      return { error: `OpenRouter API error 400: ${detail}` };
+    }
+  }
+
   return { error: `${label} API error ${response.status}: ${body.slice(0, 200)}` };
+}
+
+// OpenRouter wraps upstream failures in nested JSON, e.g.
+// {"error":{"message":"Provider returned error","metadata":{"raw":"...DEGRADED function..."}}}
+// Pull out the most specific human-readable string available.
+function extractOpenRouterErrorDetail(body) {
+  try {
+    const parsed = JSON.parse(body);
+    const err = parsed?.error;
+    if (!err) return null;
+    const raw = err.metadata?.raw;
+    if (raw) {
+      try {
+        const rawParsed = JSON.parse(raw);
+        return rawParsed?.detail || rawParsed?.title || raw;
+      } catch {
+        return raw;
+      }
+    }
+    return err.message || null;
+  } catch {
+    return null;
+  }
 }
 
 function providerLabel(provider) {
